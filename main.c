@@ -14,41 +14,24 @@ int main(int argc, char *argv[])
     
     int pid,status, stop = 0;
     while(!stop){
+
+        //get input from user
         printf("> ");
         getline(&input, &input_size, stdin);
         tokenize(input, tokens, &num_tokens);
         
 
-       // if user want to exit  
+//       if user want to exit  
         if(strcmp(tokens[0], "exit") == 0){
             printf("Bye!\n");
             stop = 1;
             break;
         }
 
-       if (pid == 0) {
-            int e = execvp(tokens[0], tokens);
-            if (e == -1) {
-                perror("execvp");
-                exit(1);
-            }
-            printf("Child process exited\n");
-            exit(0);
-        }else if(pid < 0){
-            perror("fork");
-            exit(1);
-        }else {
-            wait(&status);
-            if (WIFEXITED(status)) {
-                printf("Child process exited with status %d\n", WEXITSTATUS(status));
-            }
-        }
+        run_process(tokens, &num_tokens);
     }
     
 
-    // for (int i = 0; i < num_tokens; i++) {
-        // printf("%s\n", tokens[i]);
-    // }
-    free(input);
+   free(input);
 	return 0;
 }
