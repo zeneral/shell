@@ -21,6 +21,25 @@ int tokenize(char *str, char **tokens, int *num_tokens){
 	return 0;
 }
 
+int change_directory(char *dir){
+    if(chdir(dir) == -1){
+        printf("Error changing directory\n");
+        return 0;
+    }
+    return 1;
+}
+
+int save_history(char ** history, char *input, int *history_index){
+    *history_index = *history_index % 10;
+    int i;
+    for(i = 0; input[i] != '\0'; i++){
+        history[*history_index][i] = input[i];
+    }
+    history[*history_index][i] = '\0';
+    (*history_index)++;
+    return 0;
+}
+
 int run_process(char **tokens, int *num_tokens){
     int pid,status;
     pid = fork();
@@ -28,11 +47,11 @@ int run_process(char **tokens, int *num_tokens){
         int e = execvp(tokens[0], tokens);
         if (e == -1) {
             perror("execvp");
-            exit(1);
+            return -2;
         }
     }else if(pid < 0){
         perror("fork");
-        exit(1);
+        return -1;
     }else {
         wait(&status);
     }
