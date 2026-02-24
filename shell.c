@@ -5,6 +5,27 @@
 #include <sys/wait.h>
 #include "shell.h"
 
+
+
+int get_input(char *input, size_t input_size){
+    int i = 0;
+    while(1){
+        if(i == input_size){
+            return -1;
+        }
+        int c = getchar();
+        if(c == '\n'){
+            break;
+        }
+        if(c == 18){
+             
+        }
+        input[i++] = c;
+    }
+    input[i] = '\0';
+    return 0;
+}
+
 int tokenize(char *str, char **tokens, int *num_tokens){
 	int i = 0;
 	char *token;
@@ -29,7 +50,7 @@ int change_directory(char *dir){
     return 1;
 }
 
-int save_history(char ** history, char *input, int *history_index){
+int save_history(char history[10][10], char *input, int *history_index){
     *history_index = *history_index % 10;
     int i;
     for(i = 0; input[i] != '\0'; i++){
