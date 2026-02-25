@@ -1,6 +1,9 @@
 #ifndef MINISHELL
 #define MINISHELL
 
+#include <stdlib.h>
+
+extern pid_t child_pid;
 
 int tokenize(char *str, char **tokens, int *num_tokens);
 int run_process(char **tokens, int *num_tokens);

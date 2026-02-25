@@ -63,19 +63,37 @@ int save_history(char history[10][10], char *input, int *history_index){
 
 int run_process(char **tokens, int *num_tokens){
     int pid,status;
-    pid = fork();
-    if (pid == 0) {
+
+    //       if user want to exit  
+    if(strcmp(tokens[0], "exit") == 0){
+           printf("Bye!\n");
+           return -1;
+   }
+        
+        //       if user want to change directory
+    if(strcmp(tokens[0], "cd") == 0){
+         if(*num_tokens == 2){
+              change_directory(tokens[1]);
+         }
+         return 1;
+    }
+
+
+    child_pid = fork();
+    if (child_pid == 0) {
         int e = execvp(tokens[0], tokens);
         if (e == -1) {
             perror("execvp");
-            return -2;
+            return 0;
         }
-    }else if(pid < 0){
+    }else if(child_pid < 0){
         perror("fork");
-        return -1;
+        return 0;
     }else {
-        wait(&status);
+        if(waitpid(child_pid, &status, 0) != child_pid){
+            pause();
+        }
     }
-    return pid;
+    return 1;
 }
 

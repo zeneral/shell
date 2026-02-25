@@ -10,12 +10,13 @@
 #define MAX_DIRECTORY_LENGTH 1024
 
 
+pid_t child_pid = -1;
+
 void signal_handler(int sig){
-    printf("Exiting...\n");
-    int p = getpid();
-    if(p > 0){
-        kill(p, SIGKILL);
+    if(child_pid != -1){
+        kill(child_pid, SIGKILL);
     }
+    printf("\n");
 }
 
 int main(int argc, char *argv[])
@@ -52,34 +53,18 @@ int main(int argc, char *argv[])
             save_history(command_history, input, &command_history_index);
         }
 
-
         tokenize(input, tokens, &num_tokens);
 
         if(strcmp(tokens[0], "history") == 0){
             for(int i = command_history_index - 1; i >= 0; i--){
-                printf("[%d] %s", i,command_history[i]);
+                printf("%d . %s", i,command_history[i]);
             }
             continue;
         }
                         
-
-//       if user want to exit  
-        if(strcmp(tokens[0], "exit") == 0){
-            printf("Bye!\n");
+        if(run_process(tokens, &num_tokens) == -1){
             stop = 1;
-            break;
         }
-        
-//       if user want to change directory
-
-        if(strcmp(tokens[0], "cd") == 0){
-            if(num_tokens == 2){
-                change_directory(tokens[1]);
-            }
-            continue;
-        }
-
-        run_process(tokens, &num_tokens);
     }
     
 
