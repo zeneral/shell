@@ -1,30 +1,10 @@
 #include <string.h>
+#include <time.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
 
-
-
-int get_input(char *input, size_t input_size){
-    int i = 0;
-    while(1){
-        if(i == input_size){
-            return -1;
-        }
-        int c = getchar();
-        if(c == '\n'){
-            break;
-        }
-        if(c == 18){
-             
-        }
-        input[i++] = c;
-    }
-    input[i] = '\0';
-    return 0;
-}
 
 int tokenize(char *str, char **tokens, int *num_tokens){
 	int i = 0;
@@ -50,18 +30,19 @@ int change_directory(char *dir){
     return 1;
 }
 
-int save_history(char history[10][10], char *input, int *history_index){
-    *history_index = *history_index % 10;
-    int i;
-    for(i = 0; input[i] != '\0'; i++){
-        history[*history_index][i] = input[i];
+int jobtype(char **tokens, int *num_tokens){
+    for(int i = 0; tokens[*num_tokens - 1][i] != '\0'; i++){
+        if(tokens[*num_tokens - 1][i] == '&'){
+            printf("This is background process\n");
+            tokens[*num_tokens - 1][i] = '\0';
+            return 1;
+        }
     }
-    history[*history_index][i] = '\0';
-    (*history_index)++;
     return 0;
 }
 
-int run_process(char **tokens, int *num_tokens){
+
+int run_process(char **tokens, int *num_tokens, int job_type){
     int pid,status;
 
     //       if user want to exit  
@@ -90,8 +71,16 @@ int run_process(char **tokens, int *num_tokens){
         perror("fork");
         return 0;
     }else {
-        if(waitpid(child_pid, &status, 0) != child_pid){
-            pause();
+
+        if(!job_type){
+            waitpid(child_pid, &status, 0);
+        }else {
+            Process process = {
+                .created_time = clock(),
+                .pid = child_pid,
+                .status = 0,
+            };
+            add_process(&p_table, &process);
         }
     }
     return 1;
