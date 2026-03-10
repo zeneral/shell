@@ -1,4 +1,6 @@
 #include "shell.h"
+#include <stdio.h>
+#include <time.h>
 
 void initialize_process_table(ProcessTable *p_table){
     p_table->process_count = 0;
@@ -24,6 +26,12 @@ Process *get_process(ProcessTable *p_table, int pid){
     return NULL;
 }
 
+void destroy_process_table(ProcessTable *p_table){
+    free(p_table->table);
+    p_table->process_count = 0;
+    p_table->table_size = 0;
+}
+
 int delete_process(ProcessTable *p_table, int pid){
     Process *process = get_process(p_table, pid);
     if(process == NULL){
@@ -36,4 +44,14 @@ int delete_process(ProcessTable *p_table, int pid){
         }
     }
     return 1;
+}
+
+void display_process_table(ProcessTable *p_table){
+    for(int i = 0; i < p_table->process_count; i++){
+        printf("PID: %d\t", p_table->table[i].pid);
+        printf("Status: %d\t", p_table->table[i].status);
+        printf("Created Time: %s\t", ctime(&p_table->table[i].created_time));
+        printf("\n");
+    }
+    return;
 }

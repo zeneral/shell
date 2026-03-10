@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include  <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -23,14 +23,19 @@ void signal_handler(int sig){
     printf("\n");
 }
 
+void display_tokens(Token token){
+    for(int i = 0; token.str[i] != ' ' && token.str[i] != '\0'; i++){
+        printf("%c", token.str[i]);
+    }
+}
 
-int main(int argc, char *argv[])
-{
+
+int main(int argc, char *argv[]){
     char *input = NULL;
     size_t input_size = 10;
     char *tokens[10];
     int num_tokens; 
-
+    Token *token_list = NULL;
     char cwd[MAX_DIRECTORY_LENGTH];
     
     int job_type, pid,status, stop = 0;
@@ -58,16 +63,25 @@ int main(int argc, char *argv[])
             continue;
         }
         
-        
-        tokenize(input, tokens, &num_tokens);
-    
-        job_type = jobtype(tokens, &num_tokens);
-                               
-        if(run_process(tokens, &num_tokens, job_type) == -1){
-            break;
-        }
+        // monitor_process(&p_table);
 
+        token_list = tokenize(input, tokens, &num_tokens);
+
+        for(int i = 0; i < num_tokens; i++){
+            display_tokens(token_list[i]);
+        }
+        printf("%d", num_tokens);
+        printf("\n");
+        stop = 1; 
+        // job_type = jobtype(tokens, &num_tokens);
+                               // 
+        // if(run_process(tokens, &num_tokens, job_type) == -1){
+            // break;
+        // }
+// 
     }
-   free(input);
-	return 0;
+    free(input);
+    free(token_list);
+    destroy_process_table(&p_table);
+    return 0;
 }

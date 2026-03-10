@@ -3,13 +3,25 @@
 
 #include <stdlib.h>
 
+enum token_type {
+    COMMAND,
+    ARGUMENT,
+    AND,
+    PIPE,
+    REDIRECT,
+    BACKGROUND,
+};
 
+typedef struct {
+    char *str;
+    enum token_type type;
+} Token;
 
 typedef struct {
     int pid;
     int status;
     char *dir;
-    clock_t created_time;
+    time_t created_time;
 }Process;
 
 typedef struct {
@@ -21,16 +33,17 @@ typedef struct {
 extern pid_t child_pid;
 extern ProcessTable p_table;
 
-int tokenize(char *str, char **tokens, int *num_tokens);
+Token * tokenize(char *str, char **tokens, int *num_tokens);
 int run_process(char **tokens, int *num_tokens, int job_type);
 int change_directory(char *dir);
 int jobtype(char **tokens, int *num_tokens);
+void monitor_process(ProcessTable *p_table);
 
 //processes
-
 void initialize_process_table(ProcessTable *p_table);
 void add_process(ProcessTable *p_table, Process *process);
 Process *get_process(ProcessTable *p_table, int pid);
 int delete_process(ProcessTable *p_table, int pid);
-
+void destroy_process_table(ProcessTable *p_table);
+void display_process_table(ProcessTable *p_table);
 #endif // !MINISHELL

@@ -4,22 +4,53 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
+Token * tokenize(char *str, char **tokens, int *num_tokens){
+    if(str[0] == '\0'){
+        return NULL;
+    }
+	int k = 0;
 
-
-int tokenize(char *str, char **tokens, int *num_tokens){
-	int i = 0;
+    Token *token_list = malloc(sizeof(Token)*10);
 	char *token;
 	char *saveptr;
+    token_list[k++].str = &str[0];
+    for(int i = 0; str[i] != '\0'; i++){
+        if(str[i] == '|'){
+            token_list[k].str = &str[i];
+            token_list[k].type = PIPE;
+            k++;
+        } else if(str[i] == '&'){
+            token_list[k].str =  &str[i];
+            token_list[k].type = BACKGROUND;
+            k++;
+        }else if(str[i] == '>'){
+            token_list[k].str = &str[i];
+            token_list[k].type = REDIRECT;
+            k++;
+        }else if(str[i] == '<'){
+            token_list[k].str = &str[i];
+            token_list[k].type = REDIRECT;
+            k++;
+        }else if(str[i] == ' '){
+            if(str[i + 1] != '\0' || str[i + 1] != ' ' || str[i + 1] != '\n'){
+                token_list[k].str = &str[i+1];
+                token_list[k].type = ARGUMENT;
+                k++;
+            }
+        }
+    }
 
-	token = strtok_r(str, " \n", &saveptr);
-	while (token != NULL) {
-		tokens[i] = token;
-		i++;
-		token = strtok_r(NULL, " \n", &saveptr);
-	}
-	*num_tokens = i;
-    tokens[i++] = NULL;
-	return 0;
+	// token = strtok_r(str, " \n", &saveptr);
+	// while (token != NULL) {
+		// tokens[i] = token;
+		// i++;
+		// token = strtok_r(NULL, " \n", &saveptr);
+	// }
+	// *num_tokens = i;
+    // tokens[i++] = NULL;
+	// return 0;
+    *num_tokens = k;
+    return token_list;
 }
 
 int change_directory(char *dir){
@@ -41,6 +72,20 @@ int jobtype(char **tokens, int *num_tokens){
     return 0;
 }
 
+void monitor_process(ProcessTable *p_table){
+    for(int i = 0; i < p_table->process_count; i++){
+        int status;
+        waitpid(p_table->table[i].pid, &status, WNOHANG); // WNOHANG is used to avoid zombie process
+        if(WIFEXITED(status)){
+            //delete_process(p_table, p_table->table[i].pid); // delete process from table
+        }else if(WIFSTOPPED(status)){
+            p_table->table[i].status = status; // update status of process in table
+        }else if(WIFCONTINUED(status)){
+            p_table->table[i].status = status; // upadate status of process in table
+        }
+    }
+}
+
 
 int run_process(char **tokens, int *num_tokens, int job_type){
     int pid,status;
@@ -57,6 +102,11 @@ int run_process(char **tokens, int *num_tokens, int job_type){
               change_directory(tokens[1]);
          }
          return 1;
+    }
+
+    if(strcmp(tokens[0], "jobs") == 0){
+        display_process_table(&p_table);
+        return 1;
     }
 
 
@@ -76,7 +126,7 @@ int run_process(char **tokens, int *num_tokens, int job_type){
             waitpid(child_pid, &status, 0);
         }else {
             Process process = {
-                .created_time = clock(),
+                .created_time = time(NULL),
                 .pid = child_pid,
                 .status = 0,
             };
