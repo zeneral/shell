@@ -68,10 +68,14 @@ int main(int argc, char *argv[]){
         token_list = tokenize(input, tokens, &num_tokens);
 
         for(int i = 0; i < num_tokens; i++){
-            display_tokens(token_list[i]);
+            if(token_list[i].type == ARGUMENT || token_list[i].type == COMMAND){
+                display_tokens(token_list[i]);
+            }else{
+                printf("%c", token_list[i].str[0]);
+            }
+            printf("\n");
         }
-        printf("%d", num_tokens);
-        printf("\n");
+//        printf("%d", num_tokens);
         stop = 1; 
         // job_type = jobtype(tokens, &num_tokens);
                                // 

@@ -10,6 +10,7 @@ enum token_type {
     PIPE,
     REDIRECT,
     BACKGROUND,
+    ASSIGNMENT
 };
 
 typedef struct {

@@ -9,35 +9,43 @@ Token * tokenize(char *str, char **tokens, int *num_tokens){
         return NULL;
     }
 	int k = 0;
-
+    int i = 0;
     Token *token_list = malloc(sizeof(Token)*10);
 	char *token;
 	char *saveptr;
-    token_list[k++].str = &str[0];
-    for(int i = 0; str[i] != '\0'; i++){
+    token_list[k++].str = &str[i];
+    for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++);
+    for(; str[i] != '\0'; i++){
         if(str[i] == '|'){
             token_list[k].str = &str[i];
             token_list[k].type = PIPE;
-            k++;
         } else if(str[i] == '&'){
             token_list[k].str =  &str[i];
             token_list[k].type = BACKGROUND;
-            k++;
         }else if(str[i] == '>'){
             token_list[k].str = &str[i];
             token_list[k].type = REDIRECT;
-            k++;
         }else if(str[i] == '<'){
             token_list[k].str = &str[i];
             token_list[k].type = REDIRECT;
-            k++;
         }else if(str[i] == ' '){
-            if(str[i + 1] != '\0' || str[i + 1] != ' ' || str[i + 1] != '\n'){
-                token_list[k].str = &str[i+1];
+            // can add spacial character in future
+            continue;
+        }else if(str[i] == '"'){
+            if(str[i + 1] != '\0' && str[i + 1] != '"'){
+                token_list[k].str = &str[++i];
                 token_list[k].type = ARGUMENT;
-                k++;
             }
+            for(; str[i] != '\0' && str[i] != '"'; i++);
+        }else if(str[i] == '='){
+            token_list[k].str = &str[i];
+            token_list[k].type = ASSIGNMENT;
+        }else{
+            token_list[k].str = &str[i];
+            token_list[k].type = ARGUMENT;
+            for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++);
         }
+        k++;
     }
 
 	// token = strtok_r(str, " \n", &saveptr);
