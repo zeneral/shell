@@ -8,7 +8,8 @@ enum token_type {
     ARGUMENT,
     AND,
     PIPE,
-    REDIRECT,
+    REDIRECTIN,
+    REDIRECTOUT,
     BACKGROUND,
     ASSIGNMENT
 };
@@ -34,7 +35,8 @@ typedef struct {
 extern pid_t child_pid;
 extern ProcessTable p_table;
 
-Token * tokenize(char *str, char **tokens, int *num_tokens);
+
+Token * tokenize(char *str, int *num_tokens);
 int run_process(char **tokens, int *num_tokens, int job_type);
 int change_directory(char *dir);
 int jobtype(char **tokens, int *num_tokens);

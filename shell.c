@@ -4,17 +4,17 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
-Token * tokenize(char *str, char **tokens, int *num_tokens){
+Token * tokenize(char *str, int *num_tokens){
     if(str[0] == '\0'){
         return NULL;
     }
 	int k = 0;
     int i = 0;
     Token *token_list = malloc(sizeof(Token)*10);
-	char *token;
-	char *saveptr;
+
+    for(; str[i] != '\0' && str[i] == ' ' && str[i] != '\n'; i++); // skip white space
     token_list[k++].str = &str[i];
-    for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++);
+    for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++); // skip first token
     for(; str[i] != '\0'; i++){
         if(str[i] == '|'){
             token_list[k].str = &str[i];
@@ -24,10 +24,10 @@ Token * tokenize(char *str, char **tokens, int *num_tokens){
             token_list[k].type = BACKGROUND;
         }else if(str[i] == '>'){
             token_list[k].str = &str[i];
-            token_list[k].type = REDIRECT;
+            token_list[k].type = REDIRECTIN;
         }else if(str[i] == '<'){
             token_list[k].str = &str[i];
-            token_list[k].type = REDIRECT;
+            token_list[k].type = REDIRECTOUT;
         }else if(str[i] == ' '){
             // can add spacial character in future
             continue;
@@ -36,14 +36,17 @@ Token * tokenize(char *str, char **tokens, int *num_tokens){
                 token_list[k].str = &str[++i];
                 token_list[k].type = ARGUMENT;
             }
-            for(; str[i] != '\0' && str[i] != '"'; i++);
+            for(; str[i] != '\0' && str[i] != '"'; i++); // skip string
         }else if(str[i] == '='){
             token_list[k].str = &str[i];
             token_list[k].type = ASSIGNMENT;
         }else{
             token_list[k].str = &str[i];
-            token_list[k].type = ARGUMENT;
-            for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++);
+            if(token_list[k - 1].type == PIPE)
+                token_list[k].type = COMMAND;
+            else
+                token_list[k].type = ARGUMENT;
+            for(; str[i] != '\0' && str[i] != ' ' && str[i] != '\n'; i++); // skip argument
         }
         k++;
     }
