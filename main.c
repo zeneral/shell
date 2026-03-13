@@ -64,19 +64,20 @@ int main(int argc, char *argv[]){
         }
         
         // monitor_process(&p_table);
-
-        token_list = tokenize(input, tokens, &num_tokens);
-
-        for(int i = 0; i < num_tokens; i++){
-            if(token_list[i].type == ARGUMENT || token_list[i].type == COMMAND){
-                display_tokens(token_list[i]);
-            }else{
-                printf("%c", token_list[i].str[0]);
-            }
-            printf("\n");
+        //
+        if(strcmp(input, "exit") == 0){
+            stop = 1;
+            continue;
         }
-//        printf("%d", num_tokens);
-        stop = 1; 
+
+        token_list = tokenize(input, &num_tokens);
+
+
+        for(int i = 0; i  <= num_tokens; i++){
+            printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
+        }
+
+        //        printf("%d", num_tokens);
         // job_type = jobtype(tokens, &num_tokens);
                                // 
         // if(run_process(tokens, &num_tokens, job_type) == -1){

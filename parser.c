@@ -51,7 +51,7 @@ int parse(Token *token_list, int *num_tokens){
                 break;
             case REDIRECTIN:
                 if(token_list[i+1].type == ARGUMENT){
-                    command_list->input_file = token_list[i+1].str;
+                    tail_command->input_file = token_list[i+1].str;
                     i++;
                 }else{
                     printf("Error in redirection\n");
@@ -60,7 +60,7 @@ int parse(Token *token_list, int *num_tokens){
                 break;
             case REDIRECTOUT:
                 if(token_list[i+1].type == ARGUMENT){
-                    command_list->output_file = token_list[i+1].str;
+                    tail_command->output_file = token_list[i+1].str;
                     i++;
                 }else{
                     printf("Error in redirection\n");
@@ -72,6 +72,8 @@ int parse(Token *token_list, int *num_tokens){
                         token_list[i - 1].type == COMMAND ||
                         token_list[i - 1].type == ARGUMENT
                         && token_list[i + 1].type == COMMAND){
+
+                    //grammer = command argument | comand argument
                     //skip syntax is correct
                 }else{
                     printf("Error in pipe operator\n");

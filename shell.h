@@ -11,7 +11,9 @@ enum token_type {
     REDIRECTIN,
     REDIRECTOUT,
     BACKGROUND,
-    ASSIGNMENT
+    ASSIGNMENT,
+    VARIABLE,
+    VALUE
 };
 
 typedef struct {
