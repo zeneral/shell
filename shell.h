@@ -34,6 +34,16 @@ typedef struct {
     Process *table;
 }ProcessTable;
 
+typedef struct Command{
+    char *argv[10];
+    char *input_file;
+    char *output_file;
+    int argc;
+    struct Command *next;
+
+}Command;
+
+
 extern pid_t child_pid;
 extern ProcessTable p_table;
 
@@ -43,6 +53,10 @@ int run_process(char **tokens, int *num_tokens, int job_type);
 int change_directory(char *dir);
 int jobtype(char **tokens, int *num_tokens);
 void monitor_process(ProcessTable *p_table);
+
+//parser 
+void display_commands(Command *command_list);
+int parse(Token *token_list, int *num_tokens, Command **cmd_list);
 
 //processes
 void initialize_process_table(ProcessTable *p_table);

@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     char *tokens[10];
     int num_tokens; 
     Token *token_list = NULL;
+    Command *command_list = NULL;
     char cwd[MAX_DIRECTORY_LENGTH];
     
     int job_type, pid,status, stop = 0;
@@ -77,13 +78,13 @@ int main(int argc, char *argv[]){
             printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
         }
 
-        //        printf("%d", num_tokens);
-        // job_type = jobtype(tokens, &num_tokens);
-                               // 
-        // if(run_process(tokens, &num_tokens, job_type) == -1){
-            // break;
-        // }
-// 
+        int p = parse(token_list, &num_tokens, &command_list);
+
+        if(p){
+            display_commands(command_list);
+        }
+
+
     }
     free(input);
     free(token_list);
