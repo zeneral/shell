@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+// job type (background and foreground)
+#define BG 0
+#define FG 1
+
 enum token_type {
     COMMAND,
     ARGUMENT,
@@ -35,10 +39,12 @@ typedef struct {
 }ProcessTable;
 
 typedef struct Command{
-    char *argv[10];
+    char **argv;
     char *input_file;
     char *output_file;
     int argc;
+    size_t size;
+    size_t jobtype;
     struct Command *next;
 
 }Command;
