@@ -174,6 +174,11 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
     while(!stop && i <= *num_tokens){
         switch(token_list[i].type){
             case COMMAND:
+                // putting null at the end of argv to mark end of command
+                if(tail_command != NULL){
+                    tail_command->argv[tail_command->argc + 1] = NULL;
+                }
+
                 tail_command = add_command(&command_list, (Command){
                     .size = 5,
                     .argv = NULL, 

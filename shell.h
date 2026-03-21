@@ -55,7 +55,7 @@ extern ProcessTable p_table;
 
 
 Token * tokenize(char *str, int *num_tokens);
-int run_process(char **tokens, int *num_tokens, int job_type);
+int run_process(Command *command_list);
 int change_directory(char *dir);
 int jobtype(char **tokens, int *num_tokens);
 void monitor_process(ProcessTable *p_table);

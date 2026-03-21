@@ -54,7 +54,6 @@ int main(int argc, char *argv[]){
             exit(1);
         }
 
-
         //get input from user
         printf("[%s]> ", cwd);
         input = readline("");
@@ -74,14 +73,18 @@ int main(int argc, char *argv[]){
         token_list = tokenize(input, &num_tokens);
 
 
-        for(int i = 0; i  <= num_tokens; i++){
-            printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
-        }
+        // for(int i = 0; i  <= num_tokens; i++){
+            // printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
+        // }
 
         int p = parse(token_list, &num_tokens, &command_list);
 
         if(p){
-            display_commands(command_list);
+
+            int r = run_process(command_list);
+            if(r == -1){
+                stop = 1;
+            }
         }
 
 

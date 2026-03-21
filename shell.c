@@ -39,32 +39,78 @@ void monitor_process(ProcessTable *p_table){
 }
 
 
-int run_process(char **tokens, int *num_tokens, int job_type){
+int run_process(Command *command_list){
     int pid,status;
 
     //       if user want to exit  
-    if(strcmp(tokens[0], "exit") == 0){
+    if(strcmp(command_list->argv[0], "exit") == 0){
            printf("Bye!\n");
            return -1;
    }
         
         //       if user want to change directory
-    if(strcmp(tokens[0], "cd") == 0){
-         if(*num_tokens == 2){
-              change_directory(tokens[1]);
+    if(strcmp(command_list->argv[0], "cd") == 0){
+         if(command_list->argc == 1){
+              change_directory(command_list->argv[1]);
          }
          return 1;
     }
 
-    if(strcmp(tokens[0], "jobs") == 0){
+    if(strcmp(command_list->argv[0], "jobs") == 0){
         display_process_table(&p_table);
         return 1;
     }
 
+    int prevfd = -1;
+    while(command_list  != NULL){
+        // fd[0] is used to read from pipe
+        // fd[1] is used to write to pipe
+        int fd[2];
 
-    child_pid = fork();
+        // if this is not last command in the list the create pipe
+        if(command_list->next != NULL){
+            if(pipe(fd) == -1){
+                perror("pipe");
+                return 0;
+            }
+        }
+
+        //fork a child process
+        if(fork() == 0){
+            // if there is previous process then close its input file descriptor
+            if(prevfd != -1){
+                dup2(prevfd, STDIN_FILENO);
+                close(prevfd);
+            }
+
+            if(command_list->next != NULL){
+                dup2(fd[1], STDIN_FILENO);
+                close(fd[0]);
+                close(fd[1]);
+            }
+
+            int e = execvp(command_list->argv[0], command_list->argv);
+            if (e == -1) {
+                perror("execvp");
+                return 0;
+            }
+        }
+
+        if(prevfd != -1){
+            close(prevfd);
+        }
+
+        if(command_list->next != NULL){
+            close(fd[1]);
+            prevfd = fd[0];
+        }
+        
+    }
+
+    
+
     if (child_pid == 0) {
-        int e = execvp(tokens[0], tokens);
+        int e = execvp(command_list->argv[0], command_list->argv);
         if (e == -1) {
             perror("execvp");
             return 0;
@@ -74,7 +120,7 @@ int run_process(char **tokens, int *num_tokens, int job_type){
         return 0;
     }else {
 
-        if(!job_type){
+        if(command_list->jobtype == FG){
             waitpid(child_pid, &status, 0);
         }else {
             Process process = {
