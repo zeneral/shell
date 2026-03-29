@@ -1,9 +1,13 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
+
+#define WRITE_END 1
+#define READ_END 0
 
 int change_directory(char *dir){
     if(chdir(dir) == -1){
@@ -65,8 +69,8 @@ int run_process(Command *command_list){
     while(command_list  != NULL){
         // fd[0] is used to read from pipe
         // fd[1] is used to write to pipe
-        int fd[2];
 
+        int fd[2];
         // if this is not last command in the list the create pipe
         if(command_list->next != NULL){
             if(pipe(fd) == -1){
@@ -76,7 +80,10 @@ int run_process(Command *command_list){
         }
 
         //fork a child process
-        if(fork() == 0){
+        child_pid = fork();
+
+        // Inside of child prcess
+        if(child_pid == 0){
             // if there is previous process then close its input file descriptor
             if(prevfd != -1){
                 dup2(prevfd, STDIN_FILENO);
@@ -84,9 +91,13 @@ int run_process(Command *command_list){
             }
 
             if(command_list->next != NULL){
-                dup2(fd[1], STDIN_FILENO);
-                close(fd[0]);
-                close(fd[1]);
+                // dup2 is used to copy file descriptor form output of current
+                // process to input of current process
+                dup2(fd[WRITE_END], STDOUT_FILENO);
+                // after dup2, close the output file descriptor of current process
+                //close(fd[READ_END]);
+                // close the input file descriptor of current process
+                close(fd[WRITE_END]);
             }
 
             int e = execvp(command_list->argv[0], command_list->argv);
@@ -94,42 +105,37 @@ int run_process(Command *command_list){
                 perror("execvp");
                 return 0;
             }
+
+        }else if(child_pid < 0){
+                perror("fork");
+                return 0;
+        }else {
+            if(command_list->jobtype == FG){
+                waitpid(child_pid, &status, 0);
+            }else {
+                Process process = {
+                    .created_time = time(NULL),
+                    .pid = child_pid,
+                    .status = 0,
+                };
+                add_process(&p_table, &process);
+            }
         }
 
         if(prevfd != -1){
             close(prevfd);
         }
 
+        // end of child process
+
         if(command_list->next != NULL){
+            // close the output file descriptor of current process
             close(fd[1]);
-            prevfd = fd[0];
-        }
-        
-    }
-
-    
-
-    if (child_pid == 0) {
-        int e = execvp(command_list->argv[0], command_list->argv);
-        if (e == -1) {
-            perror("execvp");
-            return 0;
-        }
-    }else if(child_pid < 0){
-        perror("fork");
-        return 0;
-    }else {
-
-        if(command_list->jobtype == FG){
-            waitpid(child_pid, &status, 0);
-        }else {
-            Process process = {
-                .created_time = time(NULL),
-                .pid = child_pid,
-                .status = 0,
-            };
-            add_process(&p_table, &process);
-        }
+            // mark the input file descriptor of current process as previous
+            // so it can be used in next iteration
+            prevfd = fd[READ_END];
+        }        
+        command_list = command_list->next;
     }
     return 1;
 }

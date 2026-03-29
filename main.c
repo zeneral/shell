@@ -57,11 +57,12 @@ int main(int argc, char *argv[]){
         //get input from user
         printf("[%s]> ", cwd);
         input = readline("");
-        add_history(input);
 
         if(input == NULL || input[0] == '\0' || input[0] == '\n'){
             continue;
         }
+
+        add_history(input);
         
         // monitor_process(&p_table);
         //
