@@ -162,6 +162,7 @@ void display_commands(Command *command_list){
             printf("Job type: Background\n");
         else
             printf("Job type: Foreground\n");
+        printf("--------------------\n");
         current_command = current_command->next;
     }
 }
@@ -232,6 +233,7 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
 
                     //grammer = command argument | comand argument
                     //skip syntax is correct
+                tail_command->argv[tail_command->argc + 1] = NULL;
                 }else{
                     printf("Error in pipe operator\n");
                     stop = 1;
@@ -252,6 +254,7 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
         i++;
     }
 
+    tail_command->argv[tail_command->argc + 1] = NULL; // add null at the end of argv
     *cmd_list = command_list;
     return !stop;
 }

@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
@@ -66,6 +67,8 @@ int run_process(Command *command_list){
     }
 
     int prevfd = -1;
+
+    int output_file = -1, input_file = -1;
     while(command_list  != NULL){
         // fd[0] is used to read from pipe
         // fd[1] is used to write to pipe
@@ -85,19 +88,39 @@ int run_process(Command *command_list){
         // Inside of child prcess
         if(child_pid == 0){
             // if there is previous process then close its input file descriptor
+            if(command_list->output_file != NULL){
+                output_file = open(command_list->output_file, O_WRONLY | O_CREAT, 0644);
+                if(output_file == -1){
+                    perror("open");
+                    return 0;
+                }
+
+                if(dup2(output_file, STDOUT_FILENO) == -1){
+                    perror("dup2");
+                    return 0;
+                }
+                close(output_file);
+            }
+
             if(prevfd != -1){
-                dup2(prevfd, STDIN_FILENO);
+                if(dup2(prevfd, STDIN_FILENO) == -1){
+                    perror("dup2");
+                    return 0;
+                }
                 close(prevfd);
             }
 
             if(command_list->next != NULL){
                 // dup2 is used to copy file descriptor form output of current
                 // process to input of current process
-                dup2(fd[WRITE_END], STDOUT_FILENO);
-                // after dup2, close the output file descriptor of current process
-                //close(fd[READ_END]);
+                if(dup2(fd[WRITE_END], STDOUT_FILENO) == -1){
+                    perror("dup2");
+                    return 0;
+                }
                 // close the input file descriptor of current process
                 close(fd[WRITE_END]);
+                close(fd[READ_END]);
+                // not closing the read end of pipe because it will be used in next iteration
             }
 
             int e = execvp(command_list->argv[0], command_list->argv);
