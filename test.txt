@@ -1,0 +1,5 @@
+echo hello
+echo hello world
+echo hello | wc -c
+cat test.txt | grep hi
+echo hello > out.txt

@@ -48,50 +48,67 @@ int main(int argc, char *argv[]){
             printf("Error setting signal handler\n");
     }
 
-    while(!stop){
-        if(getcwd(cwd, sizeof(cwd)) == NULL){
-            printf("Error getting current working directory\n");
-            exit(1);
-        }
+    // not interactive mode
+    if(!isatty(STDIN_FILENO)){
+        while(getline(&input, &input_size, stdin) != -1){
+            token_list = tokenize(input, &num_tokens);
+            int p = parse(token_list, &num_tokens, &command_list);
 
-        //get input from user
-        printf("[%s]> ", cwd);
-        input = readline("");
-
-        if(input == NULL || input[0] == '\0' || input[0] == '\n'){
-            continue;
-        }
-
-        add_history(input);
-        
-        // monitor_process(&p_table);
-        //
-        if(strcmp(input, "exit") == 0){
-            stop = 1;
-            continue;
-        }
-
-        token_list = tokenize(input, &num_tokens);
-
-
-         // for(int i = 0; i  <= num_tokens; i++){
-           // printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
-         // }
-
-        int p = parse(token_list, &num_tokens, &command_list);
-
-        if(p){
-            //display_commands(command_list);
-
-
-            int r = run_process(command_list);
-            if(r == -1){
-                stop = 1;
+            if(p){
+                //display_commands(command_list);
+                int r = run_process(command_list);
+                if(r == -1){
+                    stop = 1;
+                }
             }
         }
-
-
+    }else{
+        //interactive mode
+        while(!stop){
+           if(getcwd(cwd, sizeof(cwd)) == NULL){
+               printf("Error getting current working directory\n");
+               exit(1);
+           }
+    
+           //get input from user
+           printf("[%s]> ", cwd);
+           input = readline("");
+    
+           if(input == NULL || input[0] == '\0' || input[0] == '\n'){
+               continue;
+           }
+    
+           add_history(input);
+           
+           // monitor_process(&p_table);
+           //
+           if(strcmp(input, "exit") == 0){
+               stop = 1;
+               continue;
+           }
+    
+           token_list = tokenize(input, &num_tokens);
+    
+            // for(int i = 0; i  <= num_tokens; i++){
+              // printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
+            // }
+    
+           int p = parse(token_list, &num_tokens, &command_list);
+    
+           if(p){
+               //display_commands(command_list);
+    
+    
+               int r = run_process(command_list);
+               if(r == -1){
+                   stop = 1;
+               }
+           }
+    
+    
+       }
     }
+    
     free(input);
     free(token_list);
     destroy_process_table(&p_table);

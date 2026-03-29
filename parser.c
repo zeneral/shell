@@ -35,14 +35,14 @@ Token * tokenize(char *str, int *num_tokens){
             str[i] = '\0';
             flag = TOKEN_DONE;
 
-        }else if(str[i] == '>'){
+        }else if(str[i] == '<'){
             if(flag == READING_TOKEN) k++;
             token_list[k].str = &str[i];
             token_list[k].type = REDIRECTIN;
             str[i] = '\0';
             flag = TOKEN_DONE;
 
-        }else if(str[i] == '<'){
+        }else if(str[i] == '>'){
             if(flag == READING_TOKEN) k++;
             token_list[k].str = &str[i];
             token_list[k].type = REDIRECTOUT;
@@ -92,6 +92,10 @@ Token * tokenize(char *str, int *num_tokens){
             if(k > 0 && token_list[k - 1].type == COMMAND){
                 token_list[k - 1].type = VARIABLE;
             }
+            str[i] = '\0';
+            flag = TOKEN_DONE;
+
+        }else if(str[i] == '\n'){
             str[i] = '\0';
             flag = TOKEN_DONE;
 
