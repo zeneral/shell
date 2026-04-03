@@ -43,8 +43,23 @@ void monitor_process(ProcessTable *p_table){
     }
 }
 
+int set_env_var(){
+    for(int i = 1; i <= e_table.count; i++){
+        if(e_table.table[i].name != NULL && e_table.table[i].value != NULL){
+            setenv(e_table.table[i].name, e_table.table[i].value, 1);
+        }else{
+            printf("Unable to set env variable\n");
+            return 0;
+        }
+    }
+   return 1; 
+}
+
 
 int run_process(Command *command_list){
+    if(command_list == NULL){
+        return 1;
+    }
     int pid,status;
 
     //       if user want to exit  

@@ -15,6 +15,7 @@
 pid_t child_pid = -1;
 
 ProcessTable p_table;
+E_table e_table;
 
 void signal_handler(int sig){
     if(child_pid != -1){
@@ -23,11 +24,7 @@ void signal_handler(int sig){
     printf("\n");
 }
 
-void display_tokens(Token token){
-    for(int i = 0; token.str[i] != ' ' && token.str[i] != '\0'; i++){
-        printf("%c", token.str[i]);
-    }
-}
+
 
 
 int main(int argc, char *argv[]){
@@ -89,23 +86,21 @@ int main(int argc, char *argv[]){
     
            token_list = tokenize(input, &num_tokens);
     
-            // for(int i = 0; i  <= num_tokens; i++){
-              // printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
-            // }
+            for(int i = 0; i  <= num_tokens; i++){
+               printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
+            }
     
            int p = parse(token_list, &num_tokens, &command_list);
     
            if(p){
                //display_commands(command_list);
-    
-    
+                int e = set_env_var();
+                if(e) printf("successfully set env variable\n");
                int r = run_process(command_list);
                if(r == -1){
                    stop = 1;
                }
            }
-    
-    
        }
     }
     

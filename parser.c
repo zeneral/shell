@@ -154,28 +154,18 @@ Command * add_command(Command **command_list, Command c){
    return new_command;
 }
 
-void display_commands(Command *command_list){
-    Command *current_command = command_list;
-    while(current_command != NULL){
-        printf("Command: ");
-        for(int i = 0; i <= current_command->argc; i++)
-            printf("%s ", current_command->argv[i]);
-        printf("\nInput file: %s\n", current_command->input_file);
-        printf("Output file: %s\n", current_command->output_file);
-        if(current_command->jobtype == BG)
-            printf("Job type: Background\n");
-        else
-            printf("Job type: Foreground\n");
-        printf("--------------------\n");
-        current_command = current_command->next;
-    }
-}
+
 
 int parse(Token *token_list, int *num_tokens, Command **cmd_list){
-    int i = 0;
+    int i = 0, v = 0; // i to count token v to count env variable
     int stop = 0;
     Command *command_list = NULL;
     Command *tail_command = NULL;
+
+    e_table.table = (E_var *)malloc(sizeof(E_var) * 5); // initalize with size 5
+    e_table.size = 5;
+    e_table.count = 0; 
+
     while(!stop && i <= *num_tokens){
         switch(token_list[i].type){
             case COMMAND:
@@ -238,6 +228,13 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
                     //grammer = command argument | comand argument
                     //skip syntax is correct
                 tail_command->argv[tail_command->argc + 1] = NULL;
+                }else if(i > 0 && i + 1 <= *num_tokens && 
+                    token_list[i - 1].type == VALUE && 
+                    token_list[i + 1].type == VARIABLE
+                    || token_list[i + 1]. type == COMMAND){
+                    // grammer = value = variable | command
+                    // value = variable | value = variable
+
                 }else{
                     printf("Error in pipe operator\n");
                     stop = 1;
@@ -254,11 +251,30 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
                 }
                 break;
 
+            case ASSIGNMENT:
+                if(i > 0 && (i < *num_tokens) || token_list[i + 1].type == VALUE){
+                   if(v == e_table.size){
+                        e_table.size += e_table.size;
+                        E_var *temp = realloc(e_table.table, sizeof(E_table) * e_table.size);
+                        if(temp != NULL){
+                            e_table.table = temp;
+                        }else{
+                            perror("realloc");
+                            stop = 1;
+                        }
+                    }
+                    e_table.table[v].name = token_list[i - 1].str;
+                    e_table.table[v].value = token_list[i + 1].str;
+                    e_table.count = v;                        
+                    v++;
+                }
+                break;
         }
         i++;
     }
 
-    tail_command->argv[tail_command->argc + 1] = NULL; // add null at the end of argv
+    if(tail_command != NULL)
+        tail_command->argv[tail_command->argc + 1] = NULL; // add null at the end of argv
     *cmd_list = command_list;
     return !stop;
 }

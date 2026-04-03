@@ -49,9 +49,21 @@ typedef struct Command{
 
 }Command;
 
+typedef struct E_var {
+    char *name;
+    char *value;
+}E_var;
+
+typedef struct E_table {
+    E_var *table;
+    size_t size;
+    size_t count;
+}E_table;
+
 
 extern pid_t child_pid;
 extern ProcessTable p_table;
+extern E_table e_table;
 
 
 Token * tokenize(char *str, int *num_tokens);
@@ -71,4 +83,7 @@ Process *get_process(ProcessTable *p_table, int pid);
 int delete_process(ProcessTable *p_table, int pid);
 void destroy_process_table(ProcessTable *p_table);
 void display_process_table(ProcessTable *p_table);
+
+//env variable
+int set_env_var();
 #endif // !MINISHELL
