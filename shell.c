@@ -44,6 +44,9 @@ void monitor_process(ProcessTable *p_table){
 }
 
 int set_env_var(){
+    if(e_table.count < 1)
+        return 0;
+    
     for(int i = 1; i <= e_table.count; i++){
         if(e_table.table[i].name != NULL && e_table.table[i].value != NULL){
             setenv(e_table.table[i].name, e_table.table[i].value, 1);

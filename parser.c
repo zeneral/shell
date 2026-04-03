@@ -157,7 +157,7 @@ Command * add_command(Command **command_list, Command c){
 
 
 int parse(Token *token_list, int *num_tokens, Command **cmd_list){
-    int i = 0, v = 0; // i to count token v to count env variable
+    int i = 0, v = 1; // i to count token v to count env variable
     int stop = 0;
     Command *command_list = NULL;
     Command *tail_command = NULL;
@@ -202,18 +202,22 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
                 tail_command->argv[tail_command->argc] = token_list[i].str;
                 break;
             case REDIRECTIN:
-                if(i > 0 && i+1 <= *num_tokens && token_list[i+1].type == ARGUMENT){
-                    tail_command->input_file = token_list[i+1].str;
-                    i++;
+                if(i > 0 && i+1 <= *num_tokens && token_list[i+1].type == ARGUMENT
+                    && (token_list[i-1].type == ARGUMENT || 
+                    token_list[i - 1].type == COMMAND)){
+                        tail_command->input_file = token_list[i+1].str;
+                        i++;
                 }else{
                     printf("Error in redirection\n");
                     stop = 1;
                 }
                 break;
             case REDIRECTOUT:
-                if(i > 0 && i+1 <= *num_tokens && token_list[i+1].type == ARGUMENT){
-                    tail_command->output_file = token_list[i+1].str;
-                    i++;
+                if(i > 0 && i+1 <= *num_tokens && token_list[i+1].type == ARGUMENT
+                    && (token_list[i-1].type == ARGUMENT || 
+                    token_list[i - 1].type == COMMAND)){
+                        tail_command->output_file = token_list[i+1].str;
+                        i++;
                 }else{
                     printf("Error in redirection\n");
                     stop = 1;
@@ -241,7 +245,9 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
                 }
                 break;
             case BACKGROUND:
-                if(i > 0 && (i <= *num_tokens || token_list[i+1].type == PIPE)){
+                if(i > 0 && (i <= *num_tokens || token_list[i+1].type == PIPE)
+                    && (token_list[i-1].type == ARGUMENT || 
+                    token_list[i - 1].type == COMMAND)){
                     // grammer = command argument & | comand argument &
                     tail_command->jobtype = BG;
                     i++;
