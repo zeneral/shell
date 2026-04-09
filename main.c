@@ -1,6 +1,5 @@
-#include  <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <readline/readline.h>
@@ -14,8 +13,11 @@
 
 pid_t child_pid = -1;
 
-ProcessTable p_table;
-E_table e_table;
+E_table e_table = {
+    .table = NULL,
+    .count = 0,
+    .size = 0
+};
 
 void signal_handler(int sig){
     if(child_pid != -1){
@@ -23,9 +25,6 @@ void signal_handler(int sig){
     }
     printf("\n");
 }
-
-
-
 
 int main(int argc, char *argv[]){
     char *input = NULL;
@@ -38,7 +37,6 @@ int main(int argc, char *argv[]){
     
     int job_type, pid,status, stop = 0;
 
-    initialize_process_table(&p_table);
 
 
     if (signal(SIGINT, signal_handler) == SIG_ERR) {
@@ -49,15 +47,24 @@ int main(int argc, char *argv[]){
     if(!isatty(STDIN_FILENO)){
         while(getline(&input, &input_size, stdin) != -1){
             token_list = tokenize(input, &num_tokens);
+            #ifdef DEBUG_SHELL
+                display_tokens(token_list, num_tokens); 
+            #endif
             int p = parse(token_list, &num_tokens, &command_list);
 
             if(p){
-                //display_commands(command_list);
+                #ifdef DEBUG_SHELL
+                    display_commands(command_list);
+                #endif
                 int r = run_process(command_list);
                 if(r == -1){
                     stop = 1;
                 }
             }
+            free(token_list);
+            free_command_list(&command_list);
+            free_env_table();
+            free(input);
         }
     }else{
         //interactive mode
@@ -77,23 +84,19 @@ int main(int argc, char *argv[]){
     
            add_history(input);
            
-           // monitor_process(&p_table);
-           //
-           if(strcmp(input, "exit") == 0){
-               stop = 1;
-               continue;
-           }
-    
            token_list = tokenize(input, &num_tokens);
-    
-            for(int i = 0; i  <= num_tokens; i++){
-               printf("[%s] type: %d\n", token_list[i].str, token_list[i].type);
-            }
-    
+
+            #ifdef DEBUG_SHELL
+                display_tokens(token_list, num_tokens); 
+            #endif
+   
            int p = parse(token_list, &num_tokens, &command_list);
     
            if(p){
-               //display_commands(command_list);
+                #ifdef DEBUG_SHELL
+                    display_commands(command_list);
+                    display_env_table();
+                #endif
                 int e = set_env_var();
                 if(e) printf("successfully set env variable\n");
                int r = run_process(command_list);
@@ -101,11 +104,14 @@ int main(int argc, char *argv[]){
                    stop = 1;
                }
            }
+            free(token_list);
+            free_command_list(&command_list);
+            free_env_table();
+            free(input);
        }
     }
     
-    free(input);
-    free(token_list);
-    destroy_process_table(&p_table);
+    input = NULL;
+    token_list = NULL;
     return 0;
 }

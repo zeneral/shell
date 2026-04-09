@@ -1,8 +1,8 @@
 main: main.c shell.c parser.c process.c shell.h
-	gcc -o main main.c shell.c parser.c process.c -lreadline 
+	gcc -o main main.c shell.c parser.c  -lreadline 
 	
 debug: main.c shell.c parser.c process.c shell.h
-	gcc -o main main.c shell.c parser.c process.c -lreadline -g
+	gcc -o main main.c shell.c parser.c debug.c -DDEBUG_SHELL -lreadline -g
 
 test: debug
 	cat test.txt | ./main > mini_shell.txt

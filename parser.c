@@ -284,3 +284,6 @@ int parse(Token *token_list, int *num_tokens, Command **cmd_list){
     *cmd_list = command_list;
     return !stop;
 }
+
+
+

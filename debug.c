@@ -3,18 +3,40 @@
 #include<time.h>
 
 
-void display_tokens(Token token, int token_count){
-    for(int i = 0; i < token_count; i++){
-        for(int j = 0; token.str[j] != ' ' && token.str[j] != '\0'; j++){
-            printf("%c", token.str[j]);
-        }    
+void display_tokens(Token *token, int token_count){
+    for(int i = 0; i <= token_count; i++){
+        printf("token: ");
+        switch(token[i].type){
+            case ARGUMENT:
+            case COMMAND:
+            case VALUE:
+            case VARIABLE:
+                printf("%s", token[i].str);
+                break;
+            case PIPE:
+                printf("|");
+                break;
+            case BACKGROUND:
+                printf("&");
+                break;
+            case REDIRECTOUT:
+                printf(">");
+                break;
+            case REDIRECTIN:
+                printf("<");
+                break;
+            case ASSIGNMENT:
+                printf("=");
+                break;
+        }
+        printf("\ttype: %d\n", token[i].type);
     }
 }
 
 void display_commands(Command *command_list){
     Command *current_command = command_list;
     while(current_command != NULL){
-        printf("Command: ");
+        printf("\n\nCommand: ");
         for(int i = 0; i <= current_command->argc; i++)
             printf("%s ", current_command->argv[i]);
         printf("\nInput file: %s\n", current_command->input_file);
@@ -28,12 +50,13 @@ void display_commands(Command *command_list){
     }
 }
 
-void display_process_table(ProcessTable *p_table){
-    for(int i = 0; i < p_table->process_count; i++){
-        printf("PID: %d\t", p_table->table[i].pid);
-        printf("Status: %d\t", p_table->table[i].status);
-        printf("Created Time: %s\t", ctime(&p_table->table[i].created_time));
-        printf("\n");
+void display_env_table(){
+    if(e_table.count < 1)
+        return;
+    printf("\nenv table\n");
+    for(int i=1; i <= e_table.count; i++){
+        printf("Name: %s => value: %s\n", e_table.table[i].name, e_table.table[i].value);
     }
-    return;
 }
+
+

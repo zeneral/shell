@@ -1,5 +1,4 @@
 #include <string.h>
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -29,19 +28,6 @@ int jobtype(char **tokens, int *num_tokens){
     return 0;
 }
 
-void monitor_process(ProcessTable *p_table){
-    for(int i = 0; i < p_table->process_count; i++){
-        int status;
-        waitpid(p_table->table[i].pid, &status, WNOHANG); // WNOHANG is used to avoid zombie process
-        if(WIFEXITED(status)){
-            //delete_process(p_table, p_table->table[i].pid); // delete process from table
-        }else if(WIFSTOPPED(status)){
-            p_table->table[i].status = status; // update status of process in table
-        }else if(WIFCONTINUED(status)){
-            p_table->table[i].status = status; // upadate status of process in table
-        }
-    }
-}
 
 int set_env_var(){
     if(e_table.count < 1)
@@ -77,11 +63,6 @@ int run_process(Command *command_list){
               change_directory(command_list->argv[1]);
          }
          return 1;
-    }
-
-    if(strcmp(command_list->argv[0], "jobs") == 0){
-        display_process_table(&p_table);
-        return 1;
     }
 
     int prevfd = -1;
@@ -154,12 +135,7 @@ int run_process(Command *command_list){
             if(command_list->jobtype == FG){
                 waitpid(child_pid, &status, 0);
             }else {
-                Process process = {
-                    .created_time = time(NULL),
-                    .pid = child_pid,
-                    .status = 0,
-                };
-                add_process(&p_table, &process);
+                child_pid = -1;
             }
         }
 
@@ -181,3 +157,17 @@ int run_process(Command *command_list){
     return 1;
 }
 
+void free_command_list(Command **command_list){
+    while(*command_list != NULL){
+        Command *temp = *command_list;
+        *command_list = (*command_list)->next;
+        free(temp->argv);
+        free(temp);
+    }
+}
+
+void free_env_table(){
+    free(e_table.table);
+    e_table.count = 0;
+    e_table.size = 0;
+}
