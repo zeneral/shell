@@ -65,6 +65,16 @@ int run_process(Command *command_list){
          return 1;
     }
 
+    if(strcmp(command_list->argv[0], "help") == 0){
+        printf(
+            "\nBuiltins"
+            "\n1.Exit: To exit the shell"
+            "\n2.cd[dir]: To change current dircotry"
+            "\n3.help: to print this message\n"
+        );
+        return 1;
+    }
+
     int prevfd = -1;
 
     int output_file = -1, input_file = -1;

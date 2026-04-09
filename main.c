@@ -75,8 +75,8 @@ int main(int argc, char *argv[]){
            }
     
            //get input from user
-           printf("[%s]> ", cwd);
-           input = readline("");
+           printf("[%s]", cwd);
+           input = readline(">");
     
            if(input == NULL || input[0] == '\0' || input[0] == '\n'){
                continue;
@@ -104,10 +104,10 @@ int main(int argc, char *argv[]){
                    stop = 1;
                }
            }
+            free(input);
             free(token_list);
             free_command_list(&command_list);
             free_env_table();
-            free(input);
        }
     }
     

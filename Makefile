@@ -1,7 +1,7 @@
-main: main.c shell.c parser.c process.c shell.h
+main: main.c shell.c parser.c shell.h
 	gcc -o main main.c shell.c parser.c  -lreadline 
 	
-debug: main.c shell.c parser.c process.c shell.h
+debug: main.c shell.c parser.c shell.h
 	gcc -o main main.c shell.c parser.c debug.c -DDEBUG_SHELL -lreadline -g
 
 test: debug
