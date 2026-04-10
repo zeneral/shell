@@ -4,7 +4,7 @@ main: main.c shell.c parser.c shell.h
 debug: main.c shell.c parser.c shell.h
 	gcc -o main main.c shell.c parser.c debug.c -DDEBUG_SHELL -lreadline -g
 
-test: debug
+test: main
 	cat test.txt | ./main > mini_shell.txt
 	cat test.txt | bash > bash.txt
 	diff mini_shell.txt bash.txt

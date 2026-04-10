@@ -68,18 +68,19 @@ Token * tokenize(char *str, int *num_tokens){
         }else if(str[i] == '"'){
             if(flag == READING_TOKEN) k++;
             str[i] = '\0';
-            if(str[i + 1] != '\0' && str[i + 1] != '"'){
-                token_list[k].str = &str[++i];
+            if(str[i + 1] != '\0' && str[i + 1] != '\n' && str[i + 1] != '"'){
+                token_list[k].str = &str[i+1];
+                i++;
                 if(k > 0 && token_list[k - 1].type == ASSIGNMENT){
                     token_list[k].type = VALUE;
                 }else
                     token_list[k].type = ARGUMENT;
             }
-            for(; str[i] != '\0' && str[i] != '"'; i++); // skip string
+            for(; str[i] != '\0' && str[i] != '"' && str[i] != '\n'; i++); // skip string
             str[i] = '\0'; // add null character to end of token
             flag = TOKEN_DONE;
             //coninue if it is last charecter
-            if(str[i + 1] == '\0'){
+            if(str[i + 1] == '\0' || str[i + 1] == '\n'){
                 i++;
                 continue;
             }

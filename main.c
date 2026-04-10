@@ -65,6 +65,8 @@ int main(int argc, char *argv[]){
             free_command_list(&command_list);
             free_env_table();
             free(input);
+            input = NULL;
+            token_list = NULL;
         }
     }else{
         //interactive mode

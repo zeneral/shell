@@ -1,5 +1,25 @@
 echo hello
 echo hello world
+echo "quoted string"
+echo one two three four
+echo "Testing with spaces"
 echo hello | wc -c
-cat test.txt | grep hi
-echo hello > out.txt
+echo "pipe test" | wc -w
+echo -e "apple\nbanana\ncherry" | grep -i b | wc -l
+seq 1 10 | grep 5
+echo "redirect test" > /tmp/mini_out.txt
+echo -e "line1\nline2\nline3"
+echo "word count test" | wc -w
+echo "character test" | wc -c
+echo -e "hello\nworld\ntest" | grep world
+echo -e "zebra\napple\nbanana" | sort
+whoami
+date
+echo "test data" | cat > /tmp/redirect_test.txt
+seq 10 1 | sort | head -5
+cat /etc/hostname
+echo -e "5\n2\n8\n1" | sort -n
+echo "multi word string" | wc
+true
+false
+echo "end of tests"

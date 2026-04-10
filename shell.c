@@ -111,6 +111,19 @@ int run_process(Command *command_list){
                 close(output_file);
             }
 
+            if(command_list->input_file != NULL){
+                input_file = open(command_list->input_file, O_RDONLY);
+                if(input_file == -1){
+                    perror("open");
+                    return 0;
+                }
+                if(dup2(input_file, STDIN_FILENO) == -1){
+                    perror("dup2");
+                    return 0;
+                }
+                close(input_file);
+            }
+
             if(prevfd != -1){
                 if(dup2(prevfd, STDIN_FILENO) == -1){
                     perror("dup2");
@@ -174,10 +187,12 @@ void free_command_list(Command **command_list){
         free(temp->argv);
         free(temp);
     }
+    *command_list = NULL;
 }
 
 void free_env_table(){
     free(e_table.table);
     e_table.count = 0;
     e_table.size = 0;
+    e_table.table = NULL;
 }
