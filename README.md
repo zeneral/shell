@@ -88,7 +88,7 @@ echo "ls -la" | ./main
 ### Output Redirection
 ```bash
 [/home]>ls -la > output.txt
-[/home]>echo "data" >> file.txt
+[/home]>echo "data" > file.txt
 ```
 
 ### Input Redirection
@@ -105,7 +105,7 @@ echo "ls -la" | ./main
 ### Environment Variables
 ```bash
 [/home]>MY_VAR = "Hello"
-[/home]>echo $MY_VAR
+[/home]>printenv MY_VAR
 ```
 
 ### Directory Navigation
